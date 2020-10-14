@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'package:mapa_app/widgets/widgets.dart';
 import 'package:mapa_app/bloc/mapa/mapa_bloc.dart';
 import 'package:mapa_app/bloc/mi_unbicacion/mi_ubicacion_bloc.dart';
-import 'package:mapa_app/widgets/widgets.dart';
 
 class MapaPage extends StatefulWidget {
 
@@ -33,7 +34,9 @@ class _MapaPageState extends State<MapaPage> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          BtnUbicacion()
+          BtnUbicacion(),
+          BtnSeguirUbicacion(),
+          BtnMiRuta()
         ],
       ),
    );
@@ -42,6 +45,7 @@ class _MapaPageState extends State<MapaPage> {
   Widget crearMapa(MiUbicacionState state){
     if(!state.existeUbicacion) return Center(child: Text('Ubicando...'));
     final mapaBloc = BlocProvider.of<MapaBloc>(context);
+    mapaBloc.add(OnNuevaUbicacion(state.ubicacion));
     final cameraPosition = CameraPosition(
       target: state.ubicacion,
       zoom: 15
@@ -52,7 +56,12 @@ class _MapaPageState extends State<MapaPage> {
       myLocationEnabled: true,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
-      onMapCreated: mapaBloc.initMapa
+      onMapCreated: mapaBloc.initMapa,
+      polylines: mapaBloc.state.polylines.values.toSet(),
+      onCameraMove: (cameraPosition){
+        //cameraPosition.target = LatLng central del mapa
+        mapaBloc.add(OnMovioMapa(cameraPosition.target));
+      },
       //onMapCreated: (GoogleMapController controller) => mapaBloc.initMapa(controller)
     );
 //    return Text('${state.ubicacion.latitude}  ${state.ubicacion.longitude}');
