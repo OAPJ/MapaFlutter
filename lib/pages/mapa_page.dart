@@ -28,8 +28,17 @@ class _MapaPageState extends State<MapaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<MiUbicacionBloc, MiUbicacionState>(
-        builder: ( _ , state) => crearMapa(state)
+      body: Stack(
+        children: [
+          BlocBuilder<MiUbicacionBloc, MiUbicacionState>(
+            builder: ( _ , state) => crearMapa(state)
+          ),
+          Positioned(
+            top: 15,
+            child: SearchBar()
+          ),
+          MarcadorManual()
+        ],
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -50,20 +59,25 @@ class _MapaPageState extends State<MapaPage> {
       target: state.ubicacion,
       zoom: 15
     );
-    return GoogleMap(
-      //mapType: MapType.satellite,
-      initialCameraPosition: cameraPosition,
-      myLocationEnabled: true,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-      onMapCreated: mapaBloc.initMapa,
-      polylines: mapaBloc.state.polylines.values.toSet(),
-      onCameraMove: (cameraPosition){
-        //cameraPosition.target = LatLng central del mapa
-        mapaBloc.add(OnMovioMapa(cameraPosition.target));
-      },
-      //onMapCreated: (GoogleMapController controller) => mapaBloc.initMapa(controller)
+    return BlocBuilder<MapaBloc,MapaState>(
+      builder: (context, _ ){
+        return GoogleMap(
+          //mapType: MapType.satellite,
+          initialCameraPosition: cameraPosition,
+          myLocationEnabled: true,
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: false,
+          onMapCreated: mapaBloc.initMapa,
+          polylines: mapaBloc.state.polylines.values.toSet(),
+          onCameraMove: (cameraPosition){
+            //cameraPosition.target = LatLng central del mapa
+            mapaBloc.add(OnMovioMapa(cameraPosition.target));
+          },
+          //onMapCreated: (GoogleMapController controller) => mapaBloc.initMapa(controller)
+        );
+      }
     );
+    
 //    return Text('${state.ubicacion.latitude}  ${state.ubicacion.longitude}');
   }
 }
